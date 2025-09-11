@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Alzheimer's Handwriting Classification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            padding: 2rem;
+            max-width: 1200px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+        }
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+        .btn-train {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        .btn-train:hover {
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #3498db;
+        }
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .prediction-badge {
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+        .prediction-patient {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        .prediction-healthy {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        .confidence-bar {
+            height: 20px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            position: relative;
+            overflow: hidden;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        .loading {
+            display: none;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+        .model-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3498db;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-brain"></i> Alzheimer's Handwriting Classification</h1>
+                <p>Advanced Machine Learning for Early Detection</p>
+            </div>
+
+            <!-- Model Status -->
+            <div class="model-info" id="modelInfo">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5><i class="fas fa-robot"></i> Model Status</h5>
+                        <p id="modelStatus" class="mb-0">Checking model status...</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-train btn-custom" onclick="trainModel()">
+                                <i class="fas fa-cog"></i> Train Full Model
+                            </button>
+                            <button class="btn btn-train btn-custom" onclick="trainSimpleModel()">
+                                <i class="fas fa-bolt"></i> Train Simple
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+                <!-- Upload Section -->
+                <div class="col-lg-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-upload"></i> Upload Handwriting Data</h4>
+                        <p>Upload a CSV file containing handwriting features for analysis.</p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Patient probability threshold: <span id="thVal">0.50</span></label>
+                            <input type="range" class="form-range" min="0" max="1" step="0.01" id="thresholdSlider" value="0.50" oninput="document.getElementById('thVal').innerText = Number(this.value).toFixed(2)">
+                            <small class="text-muted">Higher threshold reduces false positives on healthy; lower threshold reduces false negatives.</small>
+                        </div>
+                        
+                        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <h5>Click to Upload or Drag & Drop</h5>
+                            <p class="text-muted">Supports CSV files with handwriting features</p>
+                            <input type="file" id="fileInput" accept=".csv" style="display: none;">
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn btn-custom" onclick="predict()" id="predictBtn" disabled>
+                                <i class="fas fa-search"></i> Analyze Handwriting
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Features Information -->
+                    <div class="feature-card">
+                        <h5><i class="fas fa-info-circle"></i> Required Features</h5>
+                        <p>The model analyzes <strong>451 handwriting features</strong> including:</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock text-primary"></i> Time-based features (air time, total time)</li>
+                            <li><i class="fas fa-pen text-success"></i> Pressure features (mean, variance)</li>
+                            <li><i class="fas fa-arrows-alt text-warning"></i> Movement features (displacement, velocity)</li>
+                            <li><i class="fas fa-chart-line text-info"></i> Statistical features (jerk, acceleration)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="col-lg-6">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-chart-bar"></i> Analysis Results</h4>
+                        <div id="resultsContainer">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <p>Upload a file to see analysis results</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div class="loading text-center" id="loadingSpinner">
+                        <div class="spinner"></div>
+                        <p class="mt-3">Analyzing handwriting data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Results -->
+            <div id="detailedResults" style="display: none;">
+                <div class="feature-card">
+                    <h4><i class="fas fa-list-alt"></i> Detailed Analysis</h4>
+                    <div id="detailedResultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedFile = null;
+
+        // Check model status on page load
+        window.onload = function() {
+            checkModelStatus();
+        };
+
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                document.getElementById('predictBtn').disabled = false;
+                document.getElementById('uploadArea').innerHTML = `
+                    <i class="fas fa-file-csv fa-3x text-success mb-3"></i>
+                    <h5>File Selected: ${selectedFile.name}</h5>
+                    <p class="text-success">Ready for analysis</p>
+                `;
+            }
+        });
+
+        // Drag and drop handling
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                document.getElementById('fileInput').files = files;
+                document.getElementById('predictBtn').disabled = false;
+                uploadArea.innerHTML = `
+                    <i class="fas fa-file-csv fa-3x text-success mb-3"></i>
+                    <h5>File Selected: ${selectedFile.name}</h5>
+                    <p class="text-success">Ready for analysis</p>
+                `;
+            }
+        });
+
+        // Check model status
+        function checkModelStatus() {
+            fetch('/model_info')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('modelStatus').innerHTML = 
+                            '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> No model loaded</span>';
+                    } else {
+                        document.getElementById('modelStatus').innerHTML = 
+                            `<span class="text-success"><i class="fas fa-check-circle"></i> Model loaded</span><br>
+                             <small>Accuracy: ${(data.performance_metrics.accuracy * 100).toFixed(1)}% | 
+                             Features: ${data.n_features} | 
+                             Training Date: ${new Date(data.training_date).toLocaleDateString()}</small>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('modelStatus').innerHTML = 
+                        '<span class="text-danger"><i class="fas fa-times-circle"></i> Error checking model</span>';
+                });
+        }
+
+        // Train model
+        function trainModel() {
+            if (confirm('This will train a full model with hyperparameter tuning. This may take several minutes. Continue?')) {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+                
+                fetch('/train', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Full model trained successfully!');
+                            checkModelStatus();
+                        } else {
+                            alert('Error training model: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error training model: ' + error);
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-cog"></i> Train Full Model';
+                    });
+            }
+        }
+
+        // Train simple model
+        function trainSimpleModel() {
+            if (confirm('This will train a simple model quickly. Continue?')) {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+                
+                fetch('/train_simple', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Simple model trained successfully! ' + data.message);
+                            checkModelStatus();
+                        } else {
+                            alert('Error training simple model: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error training simple model: ' + error);
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-bolt"></i> Train Simple';
+                    });
+            }
+        }
+
+        // Make predictions
+        function predict() {
+            if (!selectedFile) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            // Include threshold from slider
+            const th = document.getElementById('thresholdSlider').value;
+            formData.append('threshold', th);
+
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('resultsContainer').innerHTML = '';
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    document.getElementById('resultsContainer').innerHTML = `
+                        <div class="alert alert-danger alert-custom">
+                            <i class="fas fa-exclamation-triangle"></i> Error: ${data.error}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('resultsContainer').innerHTML = `
+                    <div class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-triangle"></i> Error: ${error}
+                    </div>
+                `;
+            });
+        }
+
+        // Display results
+        function displayResults(data) {
+            const { results, summary } = data;
+            
+            // Summary statistics
+            const summaryHtml = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${summary.total_samples}</div>
+                        <div class="stat-label">Total Samples</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${summary.patient_count}</div>
+                        <div class="stat-label">Patients</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${summary.healthy_count}</div>
+                        <div class="stat-label">Healthy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${(summary.average_confidence * 100).toFixed(1)}%</div>
+                        <div class="stat-label">Avg Confidence</div>
+                    </div>
+                </div>
+            `;
+
+            // Individual results
+            let resultsHtml = '';
+            results.forEach((result, index) => {
+                const confidencePercent = (result.confidence * 100).toFixed(1);
+                const isPatient = result.prediction === 'Patient';
+                
+                resultsHtml += `
+                    <div class="result-card">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <span class="prediction-badge ${isPatient ? 'prediction-patient' : 'prediction-healthy'}">
+                                    ${result.prediction}
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="confidence-bar mb-2">
+                                    <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+                                </div>
+                                <small class="text-muted">Confidence: ${confidencePercent}%</small>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <small class="text-muted">
+                                    Sample ${result.sample_id}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('resultsContainer').innerHTML = summaryHtml + resultsHtml;
+            document.getElementById('detailedResults').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

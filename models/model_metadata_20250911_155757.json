@@ -1,0 +1,6 @@
+{
+  "model_type": "RandomForestClassifier",
+  "timestamp": "20250911_155757",
+  "training_date": "2025-09-11T15:57:59.371574",
+  "best_parameters": {
+    "n_estimators": 

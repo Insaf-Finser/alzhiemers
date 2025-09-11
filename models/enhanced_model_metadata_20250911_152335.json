@@ -1,0 +1,60 @@
+{
+  "model_type": "Enhanced_RandomForest_Paper_Optimized",
+  "timestamp": "20250911_152335",
+  "training_date": "2025-09-11T15:23:36.448565",
+  "best_parameters": {
+    "random_state": 42,
+    "n_estimators": 200,
+    "min_samples_split": 20,
+    "min_samples_leaf": 15,
+    "max_features": 0.1,
+    "max_depth": 15,
+    "criterion": "log_loss",
+    "class_weight": null,
+    "bootstrap": true
+  },
+  "n_features": 7,
+  "n_samples_train": 130,
+  "n_samples_test": 44,
+  "feature_names": [
+    "mean_acc_in_air1",
+    "num_of_pendown1",
+    "pressure_mean1",
+    "gmrt_in_air1",
+    "gmrt_on_paper1",
+    "disp_index1",
+    "air_time1"
+  ],
+  "priority_features_used": [
+    "mean_acc_in_air1",
+    "num_of_pendown1",
+    "pressure_mean1",
+    "gmrt_in_air1",
+    "gmrt_on_paper1",
+    "disp_index1",
+    "air_time1"
+  ],
+  "performance_metrics": {
+    "accuracy": {
+      "mean": 0.5,
+      "std": 0.0
+    },
+    "sensitivity": {
+      "mean": 1.0,
+      "std": 0.0
+    },
+    "specificity": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "auc": {
+      "mean": 0.5,
+      "std": 0.0
+    }
+  },
+  "paper_comparison": {
+    "target_accuracy": 0.854,
+    "achieved_accuracy": 0.5,
+    "accuracy_difference": -0.354
+  }
+}
