@@ -113,7 +113,7 @@ def prepare_data(data):
 
 def train_model(X_train, y_train):
     """Train the Random Forest model with hyperparameter tuning"""
-    print("\n🤖 Training Random Forest model...")
+    print("\n Training Random Forest model...")
     
     # Try to use parameters exported by the notebook
     nb_params = load_notebook_best_params()
@@ -152,7 +152,7 @@ def train_model(X_train, y_train):
 
 def evaluate_model(model, X_test, y_test):
     """Evaluate the trained model"""
-    print("\n📈 Evaluating model performance...")
+    print("\nEvaluating model performance...")
     
     # Make predictions
     y_pred = model.predict(X_test)
@@ -210,7 +210,7 @@ def analyze_feature_importance(model, X_train, top_n=20):
 
 def save_model_and_metadata(model, X_train, y_train, X_test, y_test, performance_metrics, best_params, skewed_features):
     """Save the trained model and metadata"""
-    print("\n💾 Saving model and metadata...")
+    print("\n Saving model and metadata...")
     
     # Create models directory
     os.makedirs('models', exist_ok=True)
@@ -281,7 +281,7 @@ def save_model_and_metadata(model, X_train, y_train, X_test, y_test, performance
 
 def cross_validate_model(model, X_train, y_train):
     """Perform cross-validation to assess model stability"""
-    print("\n🔄 Performing cross-validation...")
+    print("\n Performing cross-validation...")
     
     # 5-fold cross-validation
     cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='roc_auc')
@@ -293,7 +293,7 @@ def cross_validate_model(model, X_train, y_train):
 
 def main():
     """Main training function"""
-    print("🚀 Starting Comprehensive Alzheimer's Classification Model Training")
+    print("Starting Comprehensive Alzheimer's Classification Model Training")
     print("=" * 80)
     
     try:
@@ -310,7 +310,7 @@ def main():
         model, best_params = train_model(X_train, y_train)
 
         # 4b. Calibrate probabilities for better decision quality
-        print("\n🔧 Calibrating probabilities with cross-validation (sigmoid)...")
+        print("\nCalibrating probabilities with cross-validation (sigmoid)...")
         calibrated_model = CalibratedClassifierCV(estimator=model, method='sigmoid', cv=5)
         calibrated_model.fit(X_train, y_train)
         
@@ -330,12 +330,12 @@ def main():
         )
         
         print("\n" + "="*80)
-        print("✅ MODEL TRAINING COMPLETED SUCCESSFULLY!")
+        print(" MODEL TRAINING COMPLETED SUCCESSFULLY!")
         print("="*80)
-        print(f"📁 Model files saved with timestamp: {timestamp}")
-        print(f"🎯 Model accuracy: {performance_metrics['accuracy']:.4f}")
-        print(f"📊 ROC AUC score: {performance_metrics['auc']:.4f}")
-        print(f"🔄 CV score: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+        print(f" Model files saved with timestamp: {timestamp}")
+        print(f"Model accuracy: {performance_metrics['accuracy']:.4f}")
+        print(f"ROC AUC score: {performance_metrics['auc']:.4f}")
+        print(f" CV score: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
         print("\n💡 Next steps:")
         print("   1. Start web interface: python app.py")
         print("   2. Open Jupyter notebook: jupyter lab")
@@ -344,7 +344,7 @@ def main():
         return calibrated_model, X_test, y_test
         
     except Exception as e:
-        print(f"\n❌ Error during training: {e}")
+        print(f"\n Error during training: {e}")
         import traceback
         traceback.print_exc()
         return None, None, None

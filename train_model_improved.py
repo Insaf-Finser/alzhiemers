@@ -175,32 +175,32 @@ def save_model(model, X_train, y_train, meta: dict):
 
 
 def main():
-    print('🚀 ENHANCED Alzheimer\'s Classification Training (Paper-Optimized)')
+    print('ENHANCED Alzheimer\'s Classification Training (Paper-Optimized)')
     data = load_data()
     y = data['class']
 
-    print('🔧 Creating advanced features based on paper insights...')
+    print(' Creating advanced features based on paper insights...')
     X = extract_paper_based_features(data)
     priority_cols = X.attrs.get('priority_cols', [])
-    print(f'🎯 Found {len(priority_cols)} paper-priority base features available')
+    print(f' Found {len(priority_cols)} paper-priority base features available')
 
-    print('🔍 Enhanced preprocessing with skewness correction + robust scaling...')
+    print(' Enhanced preprocessing with skewness correction + robust scaling...')
     X, scaler = preprocess(X)
 
-    print('📐 75/25 stratified split (paper style)')
+    print(' 75/25 stratified split (paper style)')
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.25, random_state=42, stratify=y
     )
 
-    print('🤖 Training enhanced Random Forest with paper-optimized parameter ranges...')
+    print('Training enhanced Random Forest with paper-optimized parameter ranges...')
     rf = train_rf(X_train, y_train, n_iter=120)
     print('   Best RF params:', rf.get_params())
 
-    print('🔧 Calibrating model probabilities (sigmoid, 5-fold)...')
+    print(' Calibrating model probabilities (sigmoid, 5-fold)...')
     calibrated = CalibratedClassifierCV(estimator=rf, method='sigmoid', cv=5)
     calibrated.fit(X_train, y_train)
 
-    print('📈 Paper-style evaluation (10 runs)...')
+    print(' Paper-style evaluation (10 runs)...')
     eval_cv = evaluate_paper_style(calibrated, X, y)
 
     # Holdout evaluation
@@ -235,11 +235,11 @@ def main():
         'calibration': 'sigmoid_cv5'
     }
     ts = save_model(calibrated, X_train, y_train, meta)
-    print(f'💾 Saved enhanced model with timestamp: {ts}')
+    print(f' Saved enhanced model with timestamp: {ts}')
 
     # Optional ensemble (comment in to enable)
     # ensemble = maybe_make_ensemble(rf, X_train, y_train)
-    # print('🔁 Soft-voting ensemble ready')
+    # print(' Soft-voting ensemble ready')
 
     return calibrated
 
