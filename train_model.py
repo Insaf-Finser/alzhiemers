@@ -100,11 +100,11 @@ def prepare_data(data):
         X_train = X_train.drop(columns=to_drop)
         X_test = X_test.drop(columns=[c for c in to_drop if c in X_test.columns])
 
-    # SelectKBest to focus on most predictive features
-    selector = SelectKBest(score_func=f_classif, k=min(150, X_train.shape[1]))
-    selector.fit(X_train, y_train)
-    X_train = pd.DataFrame(selector.transform(X_train), index=X_train.index)
-    X_test = pd.DataFrame(selector.transform(X_test), index=X_test.index)
+    # Remove SelectKBest to keep all features
+    # selector = SelectKBest(score_func=f_classif, k=min(150, X_train.shape[1]))
+    # selector.fit(X_train, y_train)
+    # X_train = pd.DataFrame(selector.transform(X_train), index=X_train.index)
+    # X_test = pd.DataFrame(selector.transform(X_test), index=X_test.index)
     
     print(f"   • Training set: {X_train.shape[0]} samples, {X_train.shape[1]} features")
     print(f"   • Test set: {X_test.shape[0]} samples, {X_test.shape[1]} features")
